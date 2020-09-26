@@ -1,0 +1,39 @@
+var braintree = require("braintree");
+const e = require("express");
+
+var gateway = braintree.connect({
+  environment: braintree.Environment.Sandbox,
+  merchantId: "fkgw2by9pqz4zgn3",
+  publicKey: "pgtcp9ktphf2ssqb",
+  privateKey: "8bda90e1575e3c43333a39bd46a3c9e5"
+});
+
+exports.getToken = (req, res) => {
+    gateway.clientToken.generate({}, function (err, response) {
+        if (err) {
+            res.status(500).send(err)
+        } else {
+            res.send(response)
+        }
+      });
+};
+
+exports.processPayment = () => {
+    let nonceFromTheClient = req.body.paymentMethodNonce;
+
+    let amountFromTheClient = req.body.amount;
+
+    gateway.transaction.sale({
+        amount: amountFromTheClient,
+        paymentMethodNonce: nonceFromTheClient,
+        options: {
+          submitForSettlement: true
+        }
+      }, function (err, result) {
+        if (err) {
+            res.status(500).json(error)
+        } else {
+            res.json(result)
+        }
+      });
+};
